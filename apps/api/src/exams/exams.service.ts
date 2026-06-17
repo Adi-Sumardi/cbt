@@ -27,6 +27,17 @@ export class ExamsService {
     });
   }
 
+  async findAllForAdmin(status?: ExamStatus) {
+    return this.prisma.exam.findMany({
+      where: status ? { status } : undefined,
+      include: {
+        teacher: { select: { id: true, name: true, email: true } },
+        _count: { select: { questions: true, sessions: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findOne(id: string) {
     const exam = await this.prisma.exam.findUnique({
       where: { id },
@@ -41,17 +52,17 @@ export class ExamsService {
     return exam;
   }
 
-  async update(id: string, teacherId: string, data: any) {
+  async update(id: string, userId: string, data: any, isAdmin = false) {
     const exam = await this.prisma.exam.findUnique({ where: { id } });
     if (!exam) throw new NotFoundException('Ujian tidak ditemukan');
-    if (exam.teacherId !== teacherId) throw new ForbiddenException();
+    if (!isAdmin && exam.teacherId !== userId) throw new ForbiddenException();
     return this.prisma.exam.update({ where: { id }, data });
   }
 
-  async setStatus(id: string, teacherId: string, status: ExamStatus) {
+  async setStatus(id: string, userId: string, status: ExamStatus, isAdmin = false) {
     const exam = await this.prisma.exam.findUnique({ where: { id } });
     if (!exam) throw new NotFoundException();
-    if (exam.teacherId !== teacherId) throw new ForbiddenException();
+    if (!isAdmin && exam.teacherId !== userId) throw new ForbiddenException();
     return this.prisma.exam.update({ where: { id }, data: { status } });
   }
 

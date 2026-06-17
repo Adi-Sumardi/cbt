@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ExamsService } from './exams.service';
@@ -36,6 +36,11 @@ export class ExamsController {
     return this.exams.findAll(req.user.id);
   }
 
+  @Get('all')
+  findAllForAdmin(@Query('status') status?: any) {
+    return this.exams.findAllForAdmin(status || undefined);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.exams.findOne(id);
@@ -43,12 +48,12 @@ export class ExamsController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Request() req: any, @Body() dto: any) {
-    return this.exams.update(id, req.user.id, dto);
+    return this.exams.update(id, req.user.id, dto, req.user.role === 'ADMIN');
   }
 
   @Patch(':id/status')
   setStatus(@Param('id') id: string, @Request() req: any, @Body('status') status: any) {
-    return this.exams.setStatus(id, req.user.id, status);
+    return this.exams.setStatus(id, req.user.id, status, req.user.role === 'ADMIN');
   }
 
   @Get(':id/monitor')

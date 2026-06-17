@@ -116,8 +116,11 @@ export default function AdminExamsPage() {
                           Selesaikan
                         </Button>
                       )}
-                      <Link href={`/admin/exams/${exam.id}`}>
-                        <Button size="sm" variant="ghost">Detail</Button>
+                      <Link href={`/dashboard/exams/${exam.id}/edit`}>
+                        <Button size="sm" variant="outline">Edit</Button>
+                      </Link>
+                      <Link href={`/dashboard/exams/${exam.id}`}>
+                        <Button size="sm" variant="ghost">Kelola</Button>
                       </Link>
                     </div>
                   </td>

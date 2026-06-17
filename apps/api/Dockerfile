@@ -51,18 +51,16 @@ WORKDIR /app
 
 RUN apk add --no-cache openssl
 
-RUN npm install -g pnpm
-
-COPY package.json pnpm-workspace.yaml* pnpm-lock.yaml* ./
+COPY package.json pnpm-workspace.yaml* ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/shared/package.json ./packages/shared/
 
-RUN pnpm install --frozen-lockfile --prod
-
-COPY apps/api/prisma ./apps/api/prisma
-RUN cd apps/api && ./node_modules/.bin/prisma generate
-
+# Copy node_modules dari builder (sudah termasuk Prisma client ter-generate)
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/packages/shared ./packages/shared
 
 WORKDIR /app/apps/api
 

@@ -1,0 +1,49 @@
+@import "gooey-toast/styles.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out both;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+/* Prevent text selection in exam mode, except for inputs and textareas */
+.exam-mode {
+  -webkit-user-select: none;
+  user-select: none;
+}
+.exam-mode input,
+.exam-mode textarea,
+.exam-mode [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+/* Disable double-tap to zoom for fast responsive clicks on iPad */
+.exam-mode button,
+.exam-mode select,
+.exam-mode input[type="radio"],
+.exam-mode input[type="checkbox"],
+.exam-mode [role="button"] {
+  touch-action: manipulation;
+}

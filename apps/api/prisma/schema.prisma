@@ -1,0 +1,169 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  ESSAY
+  MULTIPLE_ANSWER
+  SHORT_ANSWER
+  FILL_BLANK
+  MATCHING
+}
+
+enum ExamStatus {
+  DRAFT
+  ACTIVE
+  FINISHED
+  ARCHIVED
+}
+
+enum SessionStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+  EXPIRED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  nis       String?  @unique   // Nomor Induk Siswa (untuk siswa)
+  jenjang   String?            // SD / SMP / SMA / SMK
+  kelas     String?            // contoh: X, XI, 8, 9
+  rombel    String?            // contoh: A, B, IPA 1, IPS 2
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  exams          Exam[]
+  examSessions   ExamSession[]
+}
+
+model Exam {
+  id            String     @id @default(cuid())
+  title         String
+  description   String?
+  accessCode    String     @unique   // Kode pendek untuk siswa masuk
+  duration      Int        // menit
+  status        ExamStatus @default(DRAFT)
+  shuffleQuestions Boolean @default(false)
+  shuffleOptions   Boolean @default(false)
+  showResult       Boolean @default(false)
+  passingScore     Int     @default(60)
+  targetJenjang    String?  // SD / SMP / SMA / SMK — target peserta
+  targetKelas      String?  // contoh: X, XI, 8, 9
+  targetRombel     String?  // null = semua, atau comma-separated: "A,B,IPA 1"
+  sebConfigKey     String?  // Safe Exam Browser config key
+  requireSeb       Boolean  @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  teacher       User       @relation(fields: [teacherId], references: [id])
+  teacherId     String
+
+  questions     Question[]
+  sessions      ExamSession[]
+}
+
+model Question {
+  id          String       @id @default(cuid())
+  content     String
+  type        QuestionType @default(MULTIPLE_CHOICE)
+  points      Float        @default(1)
+  isNullified Boolean      @default(false)  // soal dianulir
+  order       Int
+  imageUrl    String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  exam        Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  examId      String
+
+  options     QuestionOption[]
+  answers     StudentAnswer[]
+}
+
+model QuestionOption {
+  id         String   @id @default(cuid())
+  label      String   // A, B, C, D
+  content    String
+  isCorrect  Boolean  @default(false)
+  order      Int
+
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+}
+
+model ExamSession {
+  id             String        @id @default(cuid())
+  token          String        @unique @default(cuid())
+  status         SessionStatus @default(NOT_STARTED)
+  startedAt      DateTime?
+  submittedAt    DateTime?
+  score          Float?
+  questionOrder  Json?         // urutan soal per siswa (acak)
+  violationCount Int           @default(0)
+  violations     Json          @default("[]")
+  penaltyScore   Float         @default(0)
+
+  exam        Exam          @relation(fields: [examId], references: [id])
+  examId      String
+
+  student     User          @relation(fields: [studentId], references: [id])
+  studentId   String
+
+  answers     StudentAnswer[]
+  logs        ActivityLog[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([examId, studentId])
+}
+
+model StudentAnswer {
+  id         String   @id @default(cuid())
+  answer     String?  // option id atau teks essay
+  savedAt    DateTime @default(now())
+  isDoubtful Boolean  @default(false)  // tombol ragu-ragu
+
+  session    ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId  String
+
+  question   Question    @relation(fields: [questionId], references: [id])
+  questionId String
+
+  @@unique([sessionId, questionId])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  event     String   // blur, focus, disconnect, reconnect
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  session   ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String
+}
+
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

@@ -260,7 +260,7 @@ export default function LiveMonitorPage() {
                         size="sm"
                         variant="ghost"
                         className="text-gray-500 text-xs px-2"
-                        onClick={() => { setEditTarget(q); setEditContent(q.content); }}
+                        onClick={() => setEditTarget(q)}
                       >
                         Edit
                       </Button>

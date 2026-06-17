@@ -463,7 +463,6 @@ export default function ExamPage() {
     },
     onViolationPardoned: () => {
       setViolationCount(0);
-      setTotalPenalty(0);
       setShowPenaltyOverlay(false);
       setCurrentPenaltySeconds(0);
       toast('Pelanggaran kamu telah dihapus/diputihkan oleh pengawas', 'info');

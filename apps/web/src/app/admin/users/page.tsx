@@ -62,8 +62,8 @@ export default function AdminUsersPage() {
   );
 
   const kelasOptions = jenjangFilter ? KELAS_BY_JENJANG[jenjangFilter] || [] : [];
-  const rombelOptions = kelasFilter
-    ? [...new Set(users.filter((u: any) => u.rombel).map((u: any) => u.rombel as string))].sort()
+  const rombelOptions: string[] = kelasFilter
+    ? Array.from(new Set<string>(users.filter((u: any) => u.rombel).map((u: any) => String(u.rombel)))).sort()
     : [];
 
   return (

@@ -27,7 +27,7 @@ WORKDIR /app
 
 RUN npm install -g pnpm
 
-COPY package.json pnpm-workspace.yaml* ./
+COPY package.json pnpm-workspace.yaml* pnpm-lock.yaml* ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/shared/package.json ./packages/shared/
 

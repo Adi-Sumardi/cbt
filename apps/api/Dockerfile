@@ -31,7 +31,7 @@ RUN apk add --no-cache openssl
 
 RUN npm install -g pnpm
 
-COPY package.json pnpm-workspace.yaml* ./
+COPY package.json pnpm-workspace.yaml* pnpm-lock.yaml* ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/shared/package.json ./packages/shared/
 
@@ -53,7 +53,7 @@ RUN apk add --no-cache openssl
 
 RUN npm install -g pnpm
 
-COPY package.json pnpm-workspace.yaml* ./
+COPY package.json pnpm-workspace.yaml* pnpm-lock.yaml* ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/shared/package.json ./packages/shared/
 

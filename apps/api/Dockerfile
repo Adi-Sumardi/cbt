@@ -59,6 +59,9 @@ COPY packages/shared/package.json ./packages/shared/
 
 RUN pnpm install --frozen-lockfile --prod
 
+COPY apps/api/prisma ./apps/api/prisma
+RUN cd apps/api && ./node_modules/.bin/prisma generate
+
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 
 WORKDIR /app/apps/api

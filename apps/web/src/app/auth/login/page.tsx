@@ -191,11 +191,10 @@ function LoginForm() {
             {/* Demo accounts */}
             <div className="mt-6 pt-6 border-t border-gray-100">
               <p className="text-xs text-gray-400 text-center mb-3">Akun demo tersedia</p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {[
                   { label: 'Admin', email: 'admin@cbt.local', color: 'blue' },
                   { label: 'Guru', email: 'guru@cbt.local', color: 'blue' },
-                  { label: 'Siswa', email: 'siswa@cbt.local', color: 'blue' },
                 ].map((acc) => (
                   <button
                     key={acc.email}

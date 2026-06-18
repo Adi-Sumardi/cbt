@@ -1,7 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { REDIS_CLIENT } from '../redis/redis.module';
+import { SebService } from '../seb/seb.service';
 import Redis from 'ioredis';
+
+export interface SebContext {
+  userAgent?: string;
+  configKeyHash?: string;
+  fullUrl: string;
+}
 
 function seededShuffle<T>(array: T[], seed: string): T[] {
   const copy = [...array];
@@ -24,6 +31,7 @@ export class SessionsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    private readonly seb: SebService,
   ) {}
 
   async start(accessCode: string, studentId: string) {
@@ -236,7 +244,7 @@ export class SessionsService {
     return { session: updated, score, passed: score >= session.exam.passingScore };
   }
 
-  async resume(sessionId: string, studentId: string) {
+  async resume(sessionId: string, studentId: string, sebCtx?: SebContext) {
     const session = await this.prisma.examSession.findUnique({
       where: { id: sessionId },
       include: {
@@ -248,6 +256,21 @@ export class SessionsService {
 
     if (!session || session.studentId !== studentId) throw new NotFoundException('Sesi tidak ditemukan');
     if (session.status === 'SUBMITTED') throw new BadRequestException('Ujian sudah dikumpulkan');
+
+    // Verifikasi Safe Exam Browser (jika ujian mewajibkan SEB)
+    if (session.exam.requireSeb && sebCtx) {
+      const { configKey } = await this.seb.generateForExam(session.exam.accessCode);
+      const verdict = await this.seb.verifyRequest({
+        userAgent: sebCtx.userAgent,
+        configKeyHash: sebCtx.configKeyHash,
+        fullUrl: sebCtx.fullUrl,
+        configKey,
+      });
+      if (!verdict.ok) {
+        // Jangan beri data ujian — kembalikan instruksi pakai SEB
+        return { sebRequired: true, accessCode: session.exam.accessCode, reason: verdict.reason };
+      }
+    }
 
     // Restore question order
     const questionOrder = session.questionOrder as string[];

@@ -191,37 +191,86 @@ function PenaltyOverlay({ open, onClose, count, penaltySeconds, autoSubmit }: Pe
 }
 
 // ---- SEB Block Page ----
-function SebBlockPage() {
+function SebBlockPage({ code }: { code?: string }) {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const configUrl = code ? `${origin}/api/seb/config?code=${code}` : '';
+  // sebs:// (https) atau seb:// (http) → memaksa SEB membuka config langsung
+  const sebLaunchUrl = configUrl
+    ? configUrl.replace(/^https/, 'sebs').replace(/^http:/, 'seb:')
+    : '';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 overflow-auto py-8">
       <div className="text-center text-white max-w-md mx-4">
-        <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold mb-3">Akses Ditolak</h1>
-        <p className="text-lg text-gray-300 mb-2">Ujian ini memerlukan Safe Exam Browser</p>
-        <p className="text-sm text-gray-400 mb-8">
-          Kamu harus menggunakan Safe Exam Browser (SEB) untuk mengikuti ujian ini.
-          Buka kembali ujian ini menggunakan SEB setelah mengunduhnya.
+        <h1 className="text-2xl font-bold mb-3">Ujian Aman (SEB)</h1>
+        <p className="text-sm text-gray-300 mb-6">
+          Ujian ini wajib dikerjakan dengan <strong>Safe Exam Browser</strong> agar terkunci penuh
+          (tanpa aplikasi lain, copy-paste, atau pindah jendela).
         </p>
-        <a
-          href="https://safeexambrowser.org/download_en.html"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          Unduh Safe Exam Browser
-        </a>
-        <div className="mt-6 text-xs text-gray-500 space-y-1">
-          <p>1. Unduh dan install SEB dari link di atas</p>
-          <p>2. Buka SEB dan masukkan URL ujian</p>
-          <p>3. Masuk menggunakan akun siswa kamu</p>
+
+        {code && (
+          <a
+            href={sebLaunchUrl}
+            className="block w-full mb-3 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+          >
+            🔒 Buka Ujian di Safe Exam Browser
+          </a>
+        )}
+        {code && (
+          <a
+            href={configUrl}
+            className="block w-full mb-5 bg-white/10 hover:bg-white/20 text-white px-6 py-2.5 rounded-xl text-sm transition-colors"
+          >
+            Unduh file konfigurasi (.seb)
+          </a>
+        )}
+
+        <div className="text-left bg-white/5 rounded-xl p-4 text-xs text-gray-300 space-y-2">
+          <p className="font-semibold text-gray-200">Cara mengerjakan:</p>
+          <p>1. Install Safe Exam Browser dulu (sekali saja) —
+            <a href="https://safeexambrowser.org/download_en.html" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline ml-1">unduh di sini</a>
+          </p>
+          <p>2. Klik tombol <strong>“Buka Ujian di Safe Exam Browser”</strong> di atas</p>
+          <p>3. SEB akan terbuka otomatis & mengunci perangkat selama ujian</p>
+          <p>4. Login dengan akun siswa kamu, lalu kerjakan ujian</p>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ---- Fullscreen Gate ----
+function FullscreenGate({ onEnter, reEntry }: { onEnter: () => void; reEntry: boolean }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-700 to-blue-900 px-4">
+      <div className="text-center text-white max-w-md">
+        <div className="w-20 h-20 bg-white/15 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+          </svg>
+        </div>
+        <h1 className="text-2xl font-bold mb-3">
+          {reEntry ? 'Kembali ke Mode Ujian' : 'Mode Ujian Layar Penuh'}
+        </h1>
+        <p className="text-sm text-blue-100 mb-8">
+          {reEntry
+            ? 'Kamu keluar dari layar penuh — itu tercatat sebagai pelanggaran. Tekan tombol di bawah untuk melanjutkan ujian.'
+            : 'Ujian berjalan dalam mode layar penuh terkunci untuk menjaga kejujuran. Jangan keluar dari layar penuh, berpindah tab, atau membuka aplikasi lain selama ujian.'}
+        </p>
+        <button
+          onClick={onEnter}
+          className="inline-flex items-center gap-2 bg-white text-blue-700 hover:bg-blue-50 px-8 py-3.5 rounded-xl font-bold text-lg transition-colors shadow-lg"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+          </svg>
+          {reEntry ? 'Lanjutkan Ujian' : 'Mulai & Masuk Layar Penuh'}
+        </button>
       </div>
     </div>
   );
@@ -278,6 +327,21 @@ export default function ExamPage() {
   // SEB check — will be set after data loads
   const [sebBlocked, setSebBlocked] = useState(false);
 
+  // Fullscreen lockdown (selalu aktif, tanpa install)
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const isSebClient = typeof navigator !== 'undefined' && navigator.userAgent.includes('SEB');
+
+  const enterFullscreen = useCallback(() => {
+    const el = document.documentElement as any;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (req) {
+      Promise.resolve(req.call(el)).catch(() => {});
+    } else {
+      // Browser tanpa Fullscreen API (mis. iOS Safari) — anggap sudah "fullscreen"
+      setIsFullscreen(true);
+    }
+  }, []);
+
   // Load session + exam
   const { data, isLoading } = useQuery({
     queryKey: ['exam-session', sessionId],
@@ -294,16 +358,11 @@ export default function ExamPage() {
   });
 
   useEffect(() => {
-    if (data) {
+    if (data && !data.sebRequired) {
       setSessionId(sessionId);
       if (data.savedAnswers && !loadedRef.current) {
         loadSavedAnswers(data.savedAnswers);
         loadedRef.current = true;
-      }
-      // SEB check
-      if (data.exam?.requireSeb) {
-        const isSeb = typeof navigator !== 'undefined' && navigator.userAgent.includes('SEB');
-        if (!isSeb) setSebBlocked(true);
       }
       // Restore violation state from session
       if (data.session?.violationCount) setViolationCount(data.session.violationCount);
@@ -439,6 +498,23 @@ export default function ExamPage() {
     };
   }, [sebBlocked, data, reportViolation]);
 
+  // Deteksi keluar fullscreen → pelanggaran + minta kembali fullscreen
+  useEffect(() => {
+    if (sebBlocked || !data || data.sebRequired || isSebClient) return;
+
+    const onFsChange = () => {
+      const fs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
+      setIsFullscreen(fs);
+      if (!fs) reportViolation('FULLSCREEN_EXIT', 'Keluar dari mode layar penuh');
+    };
+    document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFsChange);
+      document.removeEventListener('webkitfullscreenchange', onFsChange);
+    };
+  }, [sebBlocked, data, isSebClient, reportViolation]);
+
   const [broadcastMessage, setBroadcastMessage] = useState<string | null>(null);
 
   const { saveAnswer } = useExamSocket({
@@ -538,7 +614,12 @@ export default function ExamPage() {
 
   if (!data) return null;
 
-  if (sebBlocked) return <SebBlockPage />;
+  if (data.sebRequired || sebBlocked) return <SebBlockPage code={data.accessCode} />;
+
+  // Gate fullscreen — wajib masuk layar penuh sebelum & selama ujian (kecuali di SEB)
+  if (!isSebClient && !isFullscreen) {
+    return <FullscreenGate onEnter={enterFullscreen} reEntry={(data.session?.violationCount ?? 0) > 0} />;
+  }
 
   const { exam } = data;
   const studentId = data.session?.studentId ?? me?.id ?? 'anon';

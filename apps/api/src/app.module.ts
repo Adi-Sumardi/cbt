@@ -14,6 +14,7 @@ import { ImportModule } from './import/import.module';
 import { UploadModule } from './upload/upload.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { AdminModule } from './admin/admin.module';
+import { SebModule } from './seb/seb.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AdminModule } from './admin/admin.module';
     UploadModule,
     WebsocketModule,
     AdminModule,
+    SebModule,
   ],
   providers: [],
 })

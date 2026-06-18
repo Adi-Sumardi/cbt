@@ -26,7 +26,13 @@ export class SessionsController {
 
   @Post('exam-session/:sessionId/resume')
   resume(@Param('sessionId') sessionId: string, @Request() req: any) {
-    return this.sessions.resume(sessionId, req.user.id);
+    const proto = String(req.headers['x-forwarded-proto'] || req.protocol || 'https').split(',')[0];
+    const host = req.headers['x-forwarded-host'] || req.headers['host'];
+    return this.sessions.resume(sessionId, req.user.id, {
+      userAgent: req.headers['user-agent'],
+      configKeyHash: req.headers['x-safeexambrowser-configkeyhash'],
+      fullUrl: `${proto}://${host}${req.originalUrl}`,
+    });
   }
 
   @Get(':sessionId/timer')

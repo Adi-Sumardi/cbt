@@ -208,6 +208,15 @@ function LoginForm() {
                 ))}
               </div>
             </div>
+
+            {/* Credit pembuat */}
+            <p className="mt-6 text-center text-[11px] text-gray-400">
+              © {new Date().getFullYear()}{' '}
+              <a href="https://adilabs.id" target="_blank" rel="noopener noreferrer" className="font-medium text-gray-500 hover:text-blue-600">
+                adilabs.id
+              </a>
+              {' '}· Seluruh hak dilindungi
+            </p>
           </div>
         </div>
       </div>

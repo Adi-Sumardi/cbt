@@ -74,6 +74,9 @@ export function TeacherSidebar() {
           </div>
         </div>
         <LogoutButton label="Keluar dari sistem" className="text-xs" />
+        <p className="mt-3 text-[10px] text-gray-300 text-center">
+          © {new Date().getFullYear()} adilabs.id
+        </p>
       </div>
     </aside>
   );

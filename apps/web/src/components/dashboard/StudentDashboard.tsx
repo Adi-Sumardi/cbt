@@ -94,6 +94,10 @@ export default function StudentDashboard() {
             </p>
           </div>
         </div>
+
+        <p className="mt-6 text-center text-[11px] text-gray-400">
+          © {new Date().getFullYear()} adilabs.id · Seluruh hak dilindungi
+        </p>
       </div>
     </div>
   );

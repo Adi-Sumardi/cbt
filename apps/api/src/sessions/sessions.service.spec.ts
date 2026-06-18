@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SessionsService } from './sessions.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { REDIS_CLIENT } from '../redis/redis.module';
+import { SebService } from '../seb/seb.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 const mockExam = {
@@ -57,6 +58,11 @@ const mockRedis = {
   del: jest.fn(),
 };
 
+const mockSeb = {
+  generateForExam: jest.fn().mockResolvedValue({ configKey: 'k', plist: '', startUrl: '' }),
+  verifyRequest: jest.fn().mockResolvedValue({ ok: true }),
+};
+
 describe('SessionsService', () => {
   let service: SessionsService;
 
@@ -66,6 +72,7 @@ describe('SessionsService', () => {
         SessionsService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: REDIS_CLIENT, useValue: mockRedis },
+        { provide: SebService, useValue: mockSeb },
       ],
     }).compile();
 

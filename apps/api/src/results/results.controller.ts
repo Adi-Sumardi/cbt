@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -17,8 +17,8 @@ export class ResultsController {
   }
 
   @Get('session/:sessionId')
-  getStudentResult(@Param('sessionId') sessionId: string) {
-    return this.results.getStudentResult(sessionId);
+  getStudentResult(@Param('sessionId') sessionId: string, @Req() req: any) {
+    return this.results.getStudentResult(sessionId, req.user.id, req.user.role);
   }
 
   @Get('exam/:examId/analysis')

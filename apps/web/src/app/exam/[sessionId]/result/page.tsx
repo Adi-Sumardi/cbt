@@ -28,9 +28,8 @@ export default function ExamResultPage() {
 
   if (!data) return null;
 
-  const { exam, score, answers } = data;
+  const { exam, score } = data;
   const passed = score >= (exam?.passingScore ?? 70);
-  const showResult = exam?.showResult;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -74,80 +73,11 @@ export default function ExamResultPage() {
           </p>
         </div>
 
-        {/* Review jawaban (hanya jika guru aktifkan showResult) */}
-        {showResult && answers && (
-          <div className="bg-white rounded-xl border border-blue-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-blue-50">
-              <h2 className="font-semibold text-gray-900">Review Jawaban</h2>
-            </div>
-            <div className="divide-y divide-gray-50">
-              {answers.map((ans: any, i: number) => {
-                const q = ans.question;
-                const correctOpt = q.options?.find((o: any) => o.isCorrect);
-                const studentOpt = q.options?.find((o: any) => o.id === ans.answer);
-                const isCorrect = correctOpt?.id === ans.answer;
-                const isNullified = q.isNullified;
-
-                return (
-                  <div key={ans.id} className="px-6 py-4">
-                    <div className="flex items-start gap-3">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                        isNullified ? 'bg-blue-100' : isCorrect ? 'bg-blue-500' : 'bg-red-100'
-                      }`}>
-                        {isNullified ? (
-                          <svg className="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14" />
-                          </svg>
-                        ) : isCorrect ? (
-                          <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        ) : (
-                          <svg className="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-gray-800 mb-2" dir="auto">
-                          <span className="font-medium text-gray-400 mr-1.5">{i + 1}.</span>
-                          {q.content}
-                          {isNullified && (
-                            <span className="ml-2 text-xs text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Dianulir</span>
-                          )}
-                        </p>
-                        {!isNullified && (
-                          <div className="space-y-1">
-                            <p className="text-xs text-gray-500">
-                              Jawaban kamu:{' '}
-                              <span className={`font-medium ${isCorrect ? 'text-blue-600' : 'text-red-500'}`}>
-                                {studentOpt ? `${studentOpt.label}. ${studentOpt.content}` : 'Tidak dijawab'}
-                              </span>
-                            </p>
-                            {!isCorrect && correctOpt && (
-                              <p className="text-xs text-gray-500">
-                                Jawaban benar:{' '}
-                                <span className="font-medium text-blue-600">
-                                  {correctOpt.label}. {correctOpt.content}
-                                </span>
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {!showResult && (
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 text-center text-sm text-blue-700">
-            Pembahasan soal akan ditampilkan oleh guru setelah seluruh ujian selesai.
-          </div>
-        )}
+        {/* Pembahasan & kunci jawaban sengaja TIDAK ditampilkan ke siswa
+            (mencegah penyebaran via screenshot/foto). Siswa hanya melihat nilai. */}
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 text-center text-sm text-blue-700">
+          Pembahasan dan kunci jawaban tidak ditampilkan. Silakan tanyakan ke guru bila ada yang ingin dibahas.
+        </div>
 
         <div className="mt-6 text-center">
           <Link href="/exam" className="text-sm text-blue-600 hover:underline">

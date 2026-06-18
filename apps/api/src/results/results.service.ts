@@ -27,18 +27,31 @@ export class ResultsService {
     };
   }
 
-  async getStudentResult(sessionId: string) {
-    return this.prisma.examSession.findUnique({
+  async getStudentResult(sessionId: string, userId?: string, role?: string) {
+    const session = await this.prisma.examSession.findUnique({
       where: { id: sessionId },
       include: {
-        exam: true,
-        answers: {
-          include: {
-            question: { include: { options: true } },
-          },
-        },
+        exam: { select: { id: true, title: true, passingScore: true, duration: true } },
       },
     });
+    if (!session) throw new NotFoundException('Hasil tidak ditemukan');
+
+    // Hanya pemilik sesi (siswa) atau guru/admin yang boleh melihat
+    const isPrivileged = role === 'TEACHER' || role === 'ADMIN';
+    if (!isPrivileged && userId && session.studentId !== userId) {
+      throw new NotFoundException('Hasil tidak ditemukan');
+    }
+
+    // Siswa HANYA menerima nilai — tidak ada jawaban/kunci (anti-bocor & anti-screenshot)
+    return {
+      id: session.id,
+      score: session.score,
+      status: session.status,
+      submittedAt: session.submittedAt,
+      violationCount: session.violationCount,
+      penaltyScore: (session as any).penaltyScore ?? 0,
+      exam: session.exam,
+    };
   }
 
   async exportToExcel(examId: string): Promise<Buffer> {

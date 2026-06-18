@@ -38,7 +38,7 @@ export class SebService {
 
   /** URL pertama yang dibuka SEB. */
   examStartUrl(base: string, accessCode: string): string {
-    return `${base}/exam/join?code=${accessCode}`;
+    return `${base}/exam?code=${accessCode}`;
   }
 
   /** URL untuk keluar dari SEB setelah selesai. */

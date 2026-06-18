@@ -423,8 +423,8 @@ export default function ExamDetailPage() {
       {exam.accessCode && (() => {
         const base = getServerUrl() || (typeof window !== 'undefined' ? window.location.origin : '');
         const domain = getDomainUrl();
-        const joinUrl = `${base}/exam/join?code=${exam.accessCode}`;
-        const domainJoinUrl = domain ? `${domain}/exam/join?code=${exam.accessCode}` : null;
+        const joinUrl = `${base}/exam?code=${exam.accessCode}`;
+        const domainJoinUrl = domain ? `${domain}/exam?code=${exam.accessCode}` : null;
         return (
           <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-5 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

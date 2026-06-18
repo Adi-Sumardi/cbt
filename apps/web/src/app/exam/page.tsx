@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -14,6 +14,12 @@ export default function ExamStartPage() {
   const { data: session } = useSession();
   const { toast } = useToast();
   const [accessCode, setAccessCode] = useState('');
+
+  // Pre-fill kode dari query param (?code=) — dipakai SEB & link akses guru
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('code');
+    if (code) setAccessCode(code.toUpperCase());
+  }, []);
 
   const { data: me } = useQuery({
     queryKey: ['me'],

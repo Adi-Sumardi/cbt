@@ -424,7 +424,9 @@ export default function ExamPage() {
   );
 
   useEffect(() => {
-    if (sebBlocked || !data) return;
+    if (sebBlocked || !data || data.sebRequired) return;
+    // Jangan catat pelanggaran selama gate fullscreen masih tampil (belum benar-benar mulai)
+    if (!isSebClient && !isFullscreen) return;
 
     const handleVisibility = () => {
       if (document.hidden) reportViolation('TAB_SWITCH', 'Tab/window tersembunyi');
@@ -496,7 +498,7 @@ export default function ExamPage() {
       document.removeEventListener('keydown', handleKeydown);
       window.removeEventListener('resize', handleResize);
     };
-  }, [sebBlocked, data, reportViolation]);
+  }, [sebBlocked, data, reportViolation, isFullscreen, isSebClient]);
 
   // Deteksi keluar fullscreen → pelanggaran + minta kembali fullscreen
   useEffect(() => {
@@ -618,7 +620,7 @@ export default function ExamPage() {
 
   // Gate fullscreen — wajib masuk layar penuh sebelum & selama ujian (kecuali di SEB)
   if (!isSebClient && !isFullscreen) {
-    return <FullscreenGate onEnter={enterFullscreen} reEntry={(data.session?.violationCount ?? 0) > 0} />;
+    return <FullscreenGate onEnter={enterFullscreen} reEntry={violationCount > 0} />;
   }
 
   const { exam } = data;

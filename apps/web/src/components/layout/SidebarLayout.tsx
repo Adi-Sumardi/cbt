@@ -30,7 +30,7 @@ export function SidebarLayout({ sidebar, children }: SidebarLayoutProps) {
 
       {/* Sidebar — fixed on mobile (slide in), static on desktop */}
       <div
-        className={`fixed top-0 left-0 h-full z-30 transition-transform duration-200 lg:static lg:translate-x-0 lg:z-auto ${
+        className={`fixed top-0 left-0 h-full z-30 transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:z-auto ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

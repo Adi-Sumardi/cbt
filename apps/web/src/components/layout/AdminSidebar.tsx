@@ -59,7 +59,7 @@ export function AdminSidebar() {
   const { data: session } = useSession();
 
   return (
-    <aside className="w-60 min-h-screen bg-white border-r border-blue-100 flex flex-col">
+    <aside className="w-60 h-screen bg-white border-r border-blue-100 flex flex-col overflow-y-auto">
       {/* Logo */}
       <div className="px-6 py-5 border-b border-blue-50">
         <div className="flex items-center gap-2.5">

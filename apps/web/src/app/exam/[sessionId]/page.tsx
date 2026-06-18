@@ -626,16 +626,17 @@ export default function ExamPage() {
   const { exam } = data;
   const studentId = data.session?.studentId ?? me?.id ?? 'anon';
 
-  // Acak urutan soal — deterministik per siswa (seed = examId + studentId)
-  const questions: any[] = exam.shuffleQuestions
-    ? shuffleArray(exam.questions ?? [], exam.id + studentId)
-    : (exam.questions ?? []);
+  // Urutan soal & opsi sudah diacak & dikunci oleh server (questionOrder + seededShuffle).
+  // Frontend cukup memakai urutan apa adanya — TIDAK mengacak ulang (hindari double-shuffle).
+  const questions: any[] = exam.questions ?? [];
 
-  // Acak pilihan jawaban — deterministik per soal per siswa
   function getOptions(q: any): any[] {
-    if (!exam.shuffleOptions) return q.options;
-    return shuffleArray([...q.options], q.id + studentId);
+    return q.options ?? [];
   }
+
+  // Label opsi mengikuti POSISI tampil (A, B, C, …) — bukan label asli DB.
+  // Jawaban tetap disimpan via opt.id sehingga penilaian tidak terpengaruh.
+  const posLabel = (i: number) => String.fromCharCode(65 + i);
 
   const currentQ = questions[currentQuestionIndex];
   const currentAnswer = currentQ ? answers[currentQ.id] : null;
@@ -800,7 +801,7 @@ export default function ExamPage() {
               {/* ---- MULTIPLE_CHOICE ---- */}
               {currentQ.type === 'MULTIPLE_CHOICE' && !isCurrentNullified && (
                 <div className="space-y-3">
-                  {getOptions(currentQ).map((opt: any) => {
+                  {getOptions(currentQ).map((opt: any, idx: number) => {
                     const selected = currentAnswer?.answer === opt.id;
                     return (
                       <button
@@ -819,7 +820,7 @@ export default function ExamPage() {
                         >
                           {selected && <div className="w-2.5 h-2.5 bg-white rounded-full" />}
                         </div>
-                        <span className="font-semibold text-gray-500 w-5">{opt.label}</span>
+                        <span className="font-semibold text-gray-500 w-5">{posLabel(idx)}</span>
                         <span
                           className={`flex-1 text-sm ${selected ? 'text-blue-900 font-medium' : 'text-gray-700'}`}
                           dir="auto"
@@ -857,7 +858,7 @@ export default function ExamPage() {
               {currentQ.type === 'MULTIPLE_ANSWER' && !isCurrentNullified && (
                 <div className="space-y-3">
                   <p className="text-xs text-blue-600 font-medium mb-2">(Pilih semua yang benar)</p>
-                  {getOptions(currentQ).map((opt: any) => {
+                  {getOptions(currentQ).map((opt: any, idx: number) => {
                     const selectedIds = (currentAnswer?.answer ?? '').split(',').filter(Boolean);
                     const selected = selectedIds.includes(opt.id);
                     return (
@@ -882,7 +883,7 @@ export default function ExamPage() {
                             </svg>
                           )}
                         </div>
-                        <span className="font-semibold text-gray-500 w-5">{opt.label}</span>
+                        <span className="font-semibold text-gray-500 w-5">{posLabel(idx)}</span>
                         <span
                           className={`flex-1 text-sm ${selected ? 'text-blue-900 font-medium' : 'text-gray-700'}`}
                           dir="auto"
@@ -930,13 +931,13 @@ export default function ExamPage() {
                   {(() => {
                     const rightItems = getShuffledRightItems(currentQ);
                     const matchingAnswers = getMatchingAnswers(currentQ.id);
-                    return currentQ.options.map((opt: any) => {
+                    return currentQ.options.map((opt: any, idx: number) => {
                       const leftText = (opt.content.split('|||')[0] ?? '').trim();
                       const selectedRight = matchingAnswers[opt.id] ?? '';
                       return (
                         <div key={opt.id} className="flex items-center gap-3">
                           <div className="flex-1 bg-white border border-blue-100 rounded-xl px-4 py-3 text-sm text-gray-800">
-                            <span className="font-semibold text-blue-600 mr-2">{opt.label}.</span>
+                            <span className="font-semibold text-blue-600 mr-2">{posLabel(idx)}.</span>
                             {leftText}
                           </div>
                           <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

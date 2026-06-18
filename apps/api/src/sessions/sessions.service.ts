@@ -249,7 +249,9 @@ export class SessionsService {
       where: { id: sessionId },
       include: {
         exam: {
-          include: { questions: { include: { options: true } } },
+          include: {
+            questions: { include: { options: { orderBy: { order: 'asc' } } } },
+          },
         },
       },
     });
